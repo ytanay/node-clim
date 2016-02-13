@@ -34,10 +34,10 @@ module.exports = clim = function (prefix, parent, patch) {
   if (!ob._prefixes) ob._prefixes = [];
   if (prefix) ob._prefixes.push(prefix);
 
-  ob.log = createLogger("LOG", ob._prefixes, noFormat);
-  ob.info = createLogger("INFO", ob._prefixes, noFormat);
-  ob.warn = createLogger("WARN", ob._prefixes, noFormat);
-  ob.error = createLogger("ERROR", ob._prefixes, noFormat);
+  ob.log = createLogger(wrapStyle('LOG', 'magenta'), ob._prefixes, noFormat);
+  ob.info = createLogger(wrapStyle('INFO', 'cyan'), ob._prefixes, noFormat);
+  ob.warn = createLogger(wrapStyle('WARN', 'yellow'), ob._prefixes, noFormat);
+  ob.error = createLogger(wrapStyle('ERROR', 'red'), ob._prefixes, noFormat);
   consoleProxy(ob);
 
   return ob;
@@ -49,7 +49,7 @@ clim.getWriteStream = function() {
 
 // By default write all logs to stderr
 clim.logWrite = function(level, prefixes, msg){
-  var line = clim.getTime() + " " + level;
+  var line = /*clim.getTime() + " " + */level;
   if (prefixes.length > 0) line += " " + prefixes.join(" ");
   line += " " + msg;
   clim.getWriteStream(level).write(line + "\n");
@@ -82,4 +82,53 @@ function createLogger(method, prefixes, noFormat) {
 
     clim.logWrite(method, prefixes, msg);
   };
+}
+
+var STYLES = { // Lifted from https://github.com/Marak/colors.js/blob/master/lib/styles.js
+  reset: [0, 0],
+
+  bold: [1, 22],
+  dim: [2, 22],
+  italic: [3, 23],
+  underline: [4, 24],
+  inverse: [7, 27],
+  hidden: [8, 28],
+  strikethrough: [9, 29],
+
+  black: [30, 39],
+  red: [31, 39],
+  green: [32, 39],
+  yellow: [33, 39],
+  blue: [34, 39],
+  magenta: [35, 39],
+  cyan: [36, 39],
+  white: [37, 39],
+  gray: [90, 39],
+  grey: [90, 39],
+
+  bgBlack: [40, 49],
+  bgRed: [41, 49],
+  bgGreen: [42, 49],
+  bgYellow: [43, 49],
+  bgBlue: [44, 49],
+  bgMagenta: [45, 49],
+  bgCyan: [46, 49],
+  bgWhite: [47, 49],
+
+  // legacy styles for colors pre v1.0.0
+  blackBG: [40, 49],
+  redBG: [41, 49],
+  greenBG: [42, 49],
+  yellowBG: [43, 49],
+  blueBG: [44, 49],
+  magentaBG: [45, 49],
+  cyanBG: [46, 49],
+  whiteBG: [47, 49]
+
+};
+
+function wrapStyle(str, style2){
+  var style = STYLES[style2];
+  console.log(style2, style)
+  return '\u001b[' + style[0] + 'm' + str + '\u001b[' + style[1] + 'm';
 }
